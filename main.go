@@ -2,19 +2,22 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/lamkn06/user-app-golang.git/internal/repository"
 	"github.com/lamkn06/user-app-golang.git/internal/route"
 	"github.com/lamkn06/user-app-golang.git/internal/runtime"
 
 	"github.com/labstack/echo/v4"
 )
 
-var runtimeConfig runtime.ServerConfig
+var (
+	runtimeConfig runtime.ServerConfig
+	dbConfig      runtime.DatabaseConfig
+)
 
 type Server struct {
 	config  runtime.ServerConfig
@@ -28,7 +31,6 @@ func (s *Server) start() {
 		r.Configure(server)
 	}
 
-	log.Println("Server started on port========", s.config)
 	channel := make(chan error)
 	go func() {
 		channel <- server.Start(":" + s.config.Port)
@@ -46,10 +48,9 @@ func (s *Server) start() {
 func main() {
 	ctx := context.Background()
 
-	runtime.LoadConfigs([]any{&runtimeConfig})
-
-	fmt.Println("runtimeConfig========", runtimeConfig.Port)
-	routers, err := route.Routers(ctx, runtimeConfig)
+	runtime.LoadConfigs([]any{&runtimeConfig, &dbConfig})
+	db, _ := repository.NewBunDB(ctx, dbConfig.PrimaryConnectionString())
+	routers, err := route.Routers(ctx, runtimeConfig, db)
 	if err != nil {
 		log.Fatalf("Failed to get routers: %v", err)
 	}

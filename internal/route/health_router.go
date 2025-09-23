@@ -4,8 +4,9 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/lamkn06/user-app-golang.git/internal/response"
+
 	"github.com/lamkn06/user-app-golang.git/internal/runtime"
+	"github.com/lamkn06/user-app-golang.git/pkg/api/response"
 )
 
 type HealthRouter struct {
