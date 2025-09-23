@@ -35,7 +35,6 @@ func (r *UserRouter) GetUsers(c echo.Context) error {
 }
 
 func (r *UserRouter) CreateUser(c echo.Context) error {
-
 	user := request.NewUserRequest{}
 	if err := c.Bind(&user); err != nil {
 		return c.JSON(http.StatusBadRequest, err)

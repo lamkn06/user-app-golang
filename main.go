@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,6 +9,8 @@ import (
 	"github.com/lamkn06/user-app-golang.git/internal/repository"
 	"github.com/lamkn06/user-app-golang.git/internal/route"
 	"github.com/lamkn06/user-app-golang.git/internal/runtime"
+	"github.com/lamkn06/user-app-golang.git/pkg/logging"
+	"github.com/rs/zerolog"
 
 	"github.com/labstack/echo/v4"
 )
@@ -22,6 +23,7 @@ var (
 type Server struct {
 	config  runtime.ServerConfig
 	routers []route.Router
+	logger  zerolog.Logger
 }
 
 func (s *Server) start() {
@@ -35,28 +37,39 @@ func (s *Server) start() {
 	go func() {
 		channel <- server.Start(":" + s.config.Port)
 	}()
-	log.Println("Server started on port", s.config.Port)
+
+	s.logger.Info().Msgf("Server started on port %s", s.config.Port)
+
 	select {
 	case sig := <-shutdownSignals():
-		log.Println("Shutting down server...")
-		log.Printf("Received signal: %v", sig)
+		s.logger.Info().Msgf("Shutting down server... Received signal: %v", sig)
 	case err := <-channel:
-		log.Fatalf("Failed to start server: %v", err)
+		s.logger.Error().Msgf("Failed to start server: %v", err)
 	}
+
+	ctx := context.Background()
+	if err := server.Shutdown(ctx); err != nil {
+		s.logger.Error().Msgf("Failed to shutdown server: %v", err)
+	}
+
+	s.logger.Info().Msg("Server shutdown complete")
 }
 
 func main() {
 	ctx := context.Background()
+	logger := logging.NewLogger()
 
+	ctx = logging.AddLoggerToContext(ctx, logger)
 	runtime.LoadConfigs([]any{&runtimeConfig, &dbConfig})
+
 	db, _ := repository.NewBunDB(ctx, dbConfig.PrimaryConnectionString())
 
 	routers, err := route.Routers(ctx, runtimeConfig, db)
 	if err != nil {
-		log.Fatalf("Failed to get routers: %v", err)
+		logger.Error().Msgf("Failed to get routers: %v", err)
 	}
 
-	s := Server{routers: routers, config: runtimeConfig}
+	s := Server{routers: routers, config: runtimeConfig, logger: logger}
 	s.start()
 }
 

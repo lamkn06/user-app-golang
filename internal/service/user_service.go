@@ -47,7 +47,6 @@ func (s *DefaultUserService) GetUsers() ([]response.NewUserResponse, error) {
 }
 
 func (s *DefaultUserService) NewUser(user request.NewUserRequest) (response.NewUserResponse, error) {
-	fmt.Println("NewUser=========", user)
 	entity := repository.UserEntity{
 		Id:    uuid.New(),
 		Name:  user.Name,
