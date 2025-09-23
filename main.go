@@ -50,6 +50,7 @@ func main() {
 
 	runtime.LoadConfigs([]any{&runtimeConfig, &dbConfig})
 	db, _ := repository.NewBunDB(ctx, dbConfig.PrimaryConnectionString())
+
 	routers, err := route.Routers(ctx, runtimeConfig, db)
 	if err != nil {
 		log.Fatalf("Failed to get routers: %v", err)

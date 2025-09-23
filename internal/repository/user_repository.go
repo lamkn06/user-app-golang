@@ -9,11 +9,13 @@ import (
 )
 
 type UserEntity struct {
-	Id        uuid.UUID
-	Name      string
-	Email     string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	bun.BaseModel `bun:"users"`
+
+	Id        uuid.UUID `bun:"id,pk,type:uuid"`
+	Name      string    `bun:"name,notnull"`
+	Email     string    `bun:"email,notnull"`
+	CreatedAt time.Time `bun:"created_at"`
+	UpdatedAt time.Time `bun:"updated_at"`
 }
 
 type UserRepository interface {

@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 
 	"github.com/lamkn06/user-app-golang.git/internal/repository"
@@ -29,6 +31,10 @@ func (s *DefaultUserService) GetUsers() ([]response.NewUserResponse, error) {
 		return []response.NewUserResponse{}, err
 	}
 
+	if len(users) == 0 {
+		return []response.NewUserResponse{}, nil
+	}
+
 	var responses []response.NewUserResponse
 	for _, user := range users {
 		responses = append(responses, response.NewUserResponse{
@@ -41,6 +47,7 @@ func (s *DefaultUserService) GetUsers() ([]response.NewUserResponse, error) {
 }
 
 func (s *DefaultUserService) NewUser(user request.NewUserRequest) (response.NewUserResponse, error) {
+	fmt.Println("NewUser=========", user)
 	entity := repository.UserEntity{
 		Id:    uuid.New(),
 		Name:  user.Name,
@@ -49,6 +56,7 @@ func (s *DefaultUserService) NewUser(user request.NewUserRequest) (response.NewU
 
 	newUser, err := s.userRepository.InsertUser(entity)
 	if err != nil {
+		fmt.Println("Error inserting user:", err)
 		return response.NewUserResponse{}, err
 	}
 

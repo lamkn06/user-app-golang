@@ -30,10 +30,12 @@ func (r *UserRouter) GetUsers(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
+
 	return c.JSON(http.StatusOK, users)
 }
 
 func (r *UserRouter) CreateUser(c echo.Context) error {
+
 	user := request.NewUserRequest{}
 	if err := c.Bind(&user); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
