@@ -4,19 +4,20 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/lamkn06/user-app-golang.git/internal/config"
 	"github.com/lamkn06/user-app-golang.git/internal/response"
+	"github.com/lamkn06/user-app-golang.git/internal/runtime"
 )
 
 type HealthRouter struct {
+	config runtime.ServerConfig
 }
 
 func (r *HealthRouter) Configure(e *echo.Echo) {
-	e.GET(config.GetVersionedAPIPath("/health"), r.HealthCheck)
+	e.GET("/api/"+r.config.APIVersion+"/health", r.HealthCheck)
 }
 
-func NewHealthRouter() *HealthRouter {
-	return &HealthRouter{}
+func NewHealthRouter(config runtime.ServerConfig) *HealthRouter {
+	return &HealthRouter{config: config}
 }
 
 // HealthCheck godoc
@@ -30,7 +31,7 @@ func NewHealthRouter() *HealthRouter {
 func (r *HealthRouter) HealthCheck(c echo.Context) (err error) {
 	healthResp := response.HealthResponse{
 		Status:  "OK",
-		Version: config.APIVersion,
+		Version: r.config.APIVersion,
 		Message: "API is healthy",
 	}
 	return c.JSON(http.StatusOK, healthResp)

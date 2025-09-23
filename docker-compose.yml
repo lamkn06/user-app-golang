@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    platform: linux/amd64
+    restart: always
+    environment:
+      POSTGRES_USER: local
+      POSTGRES_PASSWORD: local
+      POSTGRES_DB: db_name
+      POSTGRES_HOST_AUTH_METHOD: password
+    networks:
+      - user_app_network
+    command: postgres -N 500
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  user_app_network:
+    name: user_app_network
