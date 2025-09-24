@@ -8,4 +8,5 @@ const (
 	ErrorCodeForbidden           = "FORBIDDEN"
 	ErrorCodeTooManyRequests     = "TOO_MANY_REQUESTS"
 	ErrorCodeValidation          = "VALIDATION"
+	ErrorCodeFailedBindingData   = "FAILED_BINDING_DATA"
 )

@@ -1,8 +1,6 @@
 package service
 
 import (
-	"fmt"
-
 	"github.com/google/uuid"
 
 	"github.com/lamkn06/user-app-golang.git/internal/repository"
@@ -55,7 +53,6 @@ func (s *DefaultUserService) NewUser(user request.NewUserRequest) (response.NewU
 
 	newUser, err := s.userRepository.InsertUser(entity)
 	if err != nil {
-		fmt.Println("Error inserting user:", err)
 		return response.NewUserResponse{}, err
 	}
 

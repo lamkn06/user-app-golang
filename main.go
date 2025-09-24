@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/lamkn06/user-app-golang.git/internal/middleware"
 	"github.com/lamkn06/user-app-golang.git/internal/repository"
 	"github.com/lamkn06/user-app-golang.git/internal/route"
 	"github.com/lamkn06/user-app-golang.git/internal/runtime"
@@ -28,6 +29,8 @@ type Server struct {
 
 func (s *Server) start() {
 	server := echo.New()
+
+	server.HTTPErrorHandler = middleware.ErrorHandler
 
 	for _, r := range s.routers {
 		r.Configure(server)

@@ -39,31 +39,26 @@ func (r *UserRouter) GetUsers(c echo.Context) error {
 }
 
 func (r *UserRouter) CreateUser(c echo.Context) error {
-	user := request.NewUserRequest{}
-
-	// Get logger from request context
 	logger := logging.LoggerFromContext(c.Request().Context())
-	logger.Infof("Creating user=======: %v", user)
+	user := request.NewUserRequest{}
 
 	if err := c.Bind(&user); err != nil {
 		appErr := exception.ToApplicationError(err, exception.ErrorCodeBadRequest)
+		logger.Errorw("Failed to bind user", "error", err)
+		return c.JSON(http.StatusBadRequest, appErr)
+	}
+
+	if err := r.validator.Struct(user); err != nil {
+		appErr := exception.ToApplicationError(err, exception.ErrorCodeBadRequest)
+		logger.Errorw("Failed to validate user", "error", err)
 		return c.JSON(http.StatusBadRequest, appErr)
 	}
 
 	newUser, err := r.userService.NewUser(user)
 	if err != nil {
-		appErr, ok := err.(*exception.ApplicationError)
-		if !ok {
-			appErr = exception.ToApplicationError(err, exception.ErrorCodeInternalServerError)
-		}
-
-		// Return appropriate HTTP status based on error code
-		statusCode := http.StatusInternalServerError
-		if appErr.Code == exception.ErrorCodeValidation {
-			statusCode = http.StatusBadRequest
-		}
-
-		return c.JSON(statusCode, appErr)
+		logger.Errorw("Failed to create user", "error", err)
+		appErr := exception.ToApplicationError(err, exception.ErrorCodeInternalServerError)
+		return c.JSON(appErr.HTTPStatus(), appErr)
 	}
 
 	return c.JSON(http.StatusOK, newUser)
