@@ -40,7 +40,7 @@ func (s *DefaultUserService) GetUsers(listReq request.ListRequest) (response.Lis
 	var responses []response.NewUserResponse
 	for _, user := range users {
 		responses = append(responses, response.NewUserResponse{
-			ID:    user.Id,
+			ID:    user.Id.String(),
 			Name:  user.Name,
 			Email: user.Email,
 		})
@@ -63,7 +63,7 @@ func (s *DefaultUserService) NewUser(user request.NewUserRequest) (response.NewU
 	}
 
 	return response.NewUserResponse{
-		ID:    newUser.Id,
+		ID:    newUser.Id.String(),
 		Name:  newUser.Name,
 		Email: newUser.Email,
 	}, nil
@@ -76,7 +76,7 @@ func (s *DefaultUserService) GetUserById(id uuid.UUID) (response.NewUserResponse
 		return response.NewUserResponse{}, err
 	}
 	return response.NewUserResponse{
-		ID:    user.Id,
+		ID:    user.Id.String(),
 		Name:  user.Name,
 		Email: user.Email,
 	}, nil

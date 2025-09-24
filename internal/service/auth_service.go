@@ -11,8 +11,8 @@ import (
 )
 
 type AuthService interface {
-	SignUp(req request.SignUpRequest) (response.AuthResponse, error)
-	SignIn(req request.SignInRequest) (response.AuthResponse, error)
+	SignUp(req request.SignUpRequest) (response.SignUpResponse, error)
+	SignIn(req request.SignInRequest) (response.SignInResponse, error)
 	SignOut(token string) (response.SignOutResponse, error)
 }
 
@@ -28,17 +28,17 @@ func NewAuthService(userRepository repository.UserRepository, jwtService JWTServ
 	}
 }
 
-func (s *DefaultAuthService) SignUp(req request.SignUpRequest) (response.AuthResponse, error) {
+func (s *DefaultAuthService) SignUp(req request.SignUpRequest) (response.SignUpResponse, error) {
 	// Check if user already exists
 	_, err := s.userRepository.GetUserByEmail(req.Email)
 	if err == nil {
-		return response.AuthResponse{}, errors.New("user already exists")
+		return response.SignUpResponse{}, errors.New("user already exists")
 	}
 
 	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return response.AuthResponse{}, err
+		return response.SignUpResponse{}, err
 	}
 
 	// Create user
@@ -50,24 +50,11 @@ func (s *DefaultAuthService) SignUp(req request.SignUpRequest) (response.AuthRes
 
 	createdUser, err := s.userRepository.InsertUser(user)
 	if err != nil {
-		return response.AuthResponse{}, err
+		return response.SignUpResponse{}, err
 	}
 
-	// Generate tokens
-	token, err := s.jwtService.GenerateToken(createdUser.Id, createdUser.Email)
-	if err != nil {
-		return response.AuthResponse{}, err
-	}
-
-	refreshToken, err := s.jwtService.GenerateRefreshToken(createdUser.Id)
-	if err != nil {
-		return response.AuthResponse{}, err
-	}
-
-	return response.AuthResponse{
-		Token:        token,
-		RefreshToken: refreshToken,
-		User: response.UserResponse{
+	return response.SignUpResponse{
+		User: response.NewUserResponse{
 			ID:    createdUser.Id.String(),
 			Name:  createdUser.Name,
 			Email: createdUser.Email,
@@ -75,34 +62,34 @@ func (s *DefaultAuthService) SignUp(req request.SignUpRequest) (response.AuthRes
 	}, nil
 }
 
-func (s *DefaultAuthService) SignIn(req request.SignInRequest) (response.AuthResponse, error) {
+func (s *DefaultAuthService) SignIn(req request.SignInRequest) (response.SignInResponse, error) {
 	// Get user by email
 	user, err := s.userRepository.GetUserByEmail(req.Email)
 	if err != nil {
-		return response.AuthResponse{}, errors.New("invalid credentials")
+		return response.SignInResponse{}, errors.New("invalid credentials")
 	}
 
 	// Check password
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
-		return response.AuthResponse{}, errors.New("invalid credentials")
+		return response.SignInResponse{}, errors.New("invalid credentials")
 	}
 
 	// Generate tokens
 	token, err := s.jwtService.GenerateToken(user.Id, user.Email)
 	if err != nil {
-		return response.AuthResponse{}, err
+		return response.SignInResponse{}, err
 	}
 
 	refreshToken, err := s.jwtService.GenerateRefreshToken(user.Id)
 	if err != nil {
-		return response.AuthResponse{}, err
+		return response.SignInResponse{}, err
 	}
 
-	return response.AuthResponse{
+	return response.SignInResponse{
 		Token:        token,
 		RefreshToken: refreshToken,
-		User: response.UserResponse{
+		User: response.NewUserResponse{
 			ID:    user.Id.String(),
 			Name:  user.Name,
 			Email: user.Email,

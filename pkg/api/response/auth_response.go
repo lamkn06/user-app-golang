@@ -1,15 +1,13 @@
 package response
 
-type AuthResponse struct {
-	Token        string       `json:"token"`
-	RefreshToken string       `json:"refresh_token"`
-	User         UserResponse `json:"user"`
+type SignUpResponse struct {
+	User NewUserResponse `json:"user"`
 }
 
-type UserResponse struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+type SignInResponse struct {
+	Token        string          `json:"token"`
+	RefreshToken string          `json:"refresh_token"`
+	User         NewUserResponse `json:"user"`
 }
 
 type SignOutResponse struct {
