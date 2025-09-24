@@ -1,5 +1,9 @@
 package exception
 
+import (
+	"strings"
+)
+
 type ErrorDetail struct {
 	Key     string `json:"key"`
 	Field   string `json:"field"`
@@ -41,9 +45,12 @@ func ToApplicationError(err error, code string) *ApplicationError {
 		return appErr
 	}
 
-	if code == ErrorCodeInternalServerError {
+	// Hide database-related errors for security
+	if code == ErrorCodeInternalServerError || isDatabaseError(err) {
 		return &ApplicationError{
-			Code: code,
+			Code:    code,
+			Message: "Internal server error",
+			Details: []ErrorDetail{},
 		}
 	}
 
@@ -52,4 +59,39 @@ func ToApplicationError(err error, code string) *ApplicationError {
 		Message: err.Error(),
 		Details: []ErrorDetail{},
 	}
+}
+
+// isDatabaseError checks if the error is related to database operations
+func isDatabaseError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errMsg := strings.ToLower(err.Error())
+
+	// Check for common database error patterns
+	databaseKeywords := []string{
+		"database",
+		"connection",
+		"sql",
+		"postgres",
+		"mysql",
+		"constraint",
+		"foreign key",
+		"duplicate",
+		"unique",
+		"not null",
+		"timeout",
+		"deadlock",
+		"rollback",
+		"transaction",
+	}
+
+	for _, keyword := range databaseKeywords {
+		if strings.Contains(errMsg, keyword) {
+			return true
+		}
+	}
+
+	return false
 }

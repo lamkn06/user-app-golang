@@ -23,7 +23,7 @@ func Routers(ctx context.Context, config runtime.ServerConfig, db *bun.DB, jwtCo
 
 	return []Router{
 		NewHealthRouter(config),
-		NewUserRouter(config, userService),
+		NewUserRouter(config, userService, jwtService),
 		NewAuthRouter(config, authService),
 	}, err
 }

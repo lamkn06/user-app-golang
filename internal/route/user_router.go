@@ -17,17 +17,18 @@ import (
 type UserRouter struct {
 	config      runtime.ServerConfig
 	userService service.UserService
+	jwtService  service.JWTService
 	validator   *validator.Validate
 }
 
-func NewUserRouter(config runtime.ServerConfig, userService service.UserService) *UserRouter {
-	return &UserRouter{config: config, userService: userService, validator: validator.New()}
+func NewUserRouter(config runtime.ServerConfig, userService service.UserService, jwtService service.JWTService) *UserRouter {
+	return &UserRouter{config: config, userService: userService, jwtService: jwtService, validator: validator.New()}
 }
 
 func (r *UserRouter) Configure(e *echo.Echo) {
 	e.GET("/api/"+r.config.APIVersion+"/users", r.GetUsers)
 	e.POST("/api/"+r.config.APIVersion+"/users", r.CreateUser)
-	e.GET("/api/"+r.config.APIVersion+"/users/:id", r.GetUserById)
+	e.GET("/api/"+r.config.APIVersion+"/users/:id", r.GetUserById, middleware.JWTMiddleware(r.jwtService))
 }
 
 // GetUsers godoc
@@ -91,8 +92,10 @@ func (r *UserRouter) CreateUser(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
+// @Security BearerAuth
 // @Success 200 {object} response.NewUserResponse
 // @Failure 400 {object} exception.ApplicationError
+// @Failure 401 {object} exception.ApplicationError
 // @Failure 500 {object} exception.ApplicationError
 // @Router /users/{id} [get]
 func (r *UserRouter) GetUserById(c echo.Context) error {
