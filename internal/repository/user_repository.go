@@ -20,7 +20,8 @@ type UserEntity struct {
 }
 
 type UserRepository interface {
-	GetUsers() ([]UserEntity, error)
+	GetUsersWithPagination(offset, limit int) ([]UserEntity, error)
+	GetUsersCount() (int64, error)
 	InsertUser(user UserEntity) (out UserEntity, err error)
 	GetUserById(id uuid.UUID) (out UserEntity, err error)
 	GetUserByEmail(email string) (out UserEntity, err error)
@@ -35,13 +36,28 @@ func NewUserRepository(db *bun.DB, ctx context.Context) UserRepository {
 	return &DefaultUserRepository{db: db, ctx: ctx}
 }
 
-func (r *DefaultUserRepository) GetUsers() ([]UserEntity, error) {
+func (r *DefaultUserRepository) GetUsersWithPagination(offset, limit int) ([]UserEntity, error) {
 	var users []UserEntity
-	err := r.db.NewSelect().Model(&users).Scan(r.ctx)
+	err := r.db.NewSelect().
+		Model(&users).
+		Offset(offset).
+		Limit(limit).
+		Order("created_at DESC").
+		Scan(r.ctx)
 	if err != nil {
 		return []UserEntity{}, err
 	}
 	return users, nil
+}
+
+func (r *DefaultUserRepository) GetUsersCount() (int64, error) {
+	count, err := r.db.NewSelect().
+		Model((*UserEntity)(nil)).
+		Count(r.ctx)
+	if err != nil {
+		return 0, err
+	}
+	return int64(count), nil
 }
 
 func (r *DefaultUserRepository) InsertUser(user UserEntity) (out UserEntity, err error) {

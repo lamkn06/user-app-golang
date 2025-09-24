@@ -32,18 +32,49 @@ func (r *UserRouter) Configure(e *echo.Echo) {
 }
 
 // GetUsers godoc
-// @Summary Get all users
-// @Description Get all users from the database
+// @Summary Get all users with pagination
+// @Description Get all users from the database with pagination support
 // @Tags users
 // @Accept json
 // @Produce json
-// @Success 200 {array} response.NewUserResponse
+// @Param page query int false "Page number" default(1)
+// @Param limit query int false "Items per page" default(10)
+// @Success 200 {object} response.ListResponse[response.NewUserResponse]
+// @Failure 400 {object} exception.ApplicationError
 // @Failure 500 {object} exception.ApplicationError
 // @Router /users [get]
 func (r *UserRouter) GetUsers(c echo.Context) error {
-	users, err := r.userService.GetUsers()
+	logger := logging.LoggerFromContext(c.Request().Context())
+
+	// Parse pagination parameters with defaults
+	listReq := request.NewListRequest()
+	if err := c.Bind(&listReq); err != nil {
+		appErr := exception.ToApplicationError(err, exception.ErrorCodeBadRequest)
+		logger.Errorw("Failed to bind pagination parameters", "error", err)
+		return c.JSON(appErr.HTTPStatus(), appErr)
+	}
+
+	// Apply defaults if not provided
+	if listReq.Page <= 0 {
+		listReq.Page = 1
+	}
+	if listReq.Limit <= 0 {
+		listReq.Limit = 10
+	}
+
+	// Validate pagination parameters
+	if err := r.validator.Struct(listReq); err != nil {
+		appErr := middleware.ParseValidationError(err)
+		logger.Errorw("Failed to validate pagination parameters", "error", err)
+		return c.JSON(appErr.HTTPStatus(), appErr)
+	}
+
+	// Get users with pagination
+	users, err := r.userService.GetUsers(listReq)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		logger.Errorw("Failed to get users", "error", err)
+		appErr := exception.ToApplicationError(err, exception.ErrorCodeInternalServerError)
+		return c.JSON(appErr.HTTPStatus(), appErr)
 	}
 
 	return c.JSON(http.StatusOK, users)
