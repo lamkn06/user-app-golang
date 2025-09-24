@@ -2,12 +2,10 @@ package response
 
 // ListMeta represents metadata for list responses
 type ListMeta struct {
-	Total       int64 `json:"total"`
-	Page        int   `json:"page"`
-	Limit       int   `json:"limit"`
-	TotalPages  int   `json:"totalPages"`
-	HasNext     bool  `json:"hasNext"`
-	HasPrevious bool  `json:"hasPrevious"`
+	Total      int64 `json:"total"`
+	Page       int   `json:"page"`
+	Limit      int   `json:"limit"`
+	TotalPages int   `json:"totalPages"`
 }
 
 // ListResponse represents a paginated list response
@@ -27,12 +25,10 @@ func NewListResponse[T any](items []T, total int64, page, limit int) ListRespons
 
 	return ListResponse[T]{
 		Meta: ListMeta{
-			Total:       total,
-			Page:        page,
-			Limit:       limit,
-			TotalPages:  totalPages,
-			HasNext:     page < totalPages,
-			HasPrevious: page > 1,
+			Total:      total,
+			Page:       page,
+			Limit:      limit,
+			TotalPages: totalPages,
 		},
 		Items:   items,
 		Success: true,

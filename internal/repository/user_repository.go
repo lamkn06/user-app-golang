@@ -20,7 +20,7 @@ type UserEntity struct {
 }
 
 type UserRepository interface {
-	GetUsersWithPagination(offset, limit int) ([]UserEntity, error)
+	GetUsers(offset, limit int) ([]UserEntity, error)
 	GetUsersCount() (int64, error)
 	InsertUser(user UserEntity) (out UserEntity, err error)
 	GetUserById(id uuid.UUID) (out UserEntity, err error)
@@ -36,7 +36,7 @@ func NewUserRepository(db *bun.DB, ctx context.Context) UserRepository {
 	return &DefaultUserRepository{db: db, ctx: ctx}
 }
 
-func (r *DefaultUserRepository) GetUsersWithPagination(offset, limit int) ([]UserEntity, error) {
+func (r *DefaultUserRepository) GetUsers(offset, limit int) ([]UserEntity, error) {
 	var users []UserEntity
 	err := r.db.NewSelect().
 		Model(&users).

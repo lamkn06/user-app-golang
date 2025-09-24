@@ -31,7 +31,7 @@ func (s *DefaultUserService) GetUsers(listReq request.ListRequest) (response.Lis
 	}
 
 	// Get paginated users
-	users, err := s.userRepository.GetUsersWithPagination(listReq.GetOffset(), listReq.GetLimit())
+	users, err := s.userRepository.GetUsers(listReq.GetOffset(), listReq.GetLimit())
 	if err != nil {
 		return response.ListResponse[response.NewUserResponse]{}, err
 	}
