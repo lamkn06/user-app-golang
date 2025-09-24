@@ -36,6 +36,7 @@ import (
 var (
 	runtimeConfig runtime.ServerConfig
 	dbConfig      runtime.DatabaseConfig
+	jwtConfig     runtime.JWTConfig
 )
 
 type Server struct {
@@ -79,7 +80,7 @@ func (s *Server) start() {
 }
 
 func main() {
-	runtime.LoadConfigs([]any{&runtimeConfig, &dbConfig})
+	runtime.LoadConfigs([]any{&runtimeConfig, &dbConfig, &jwtConfig})
 
 	logging.Init()
 	logger := logging.NewSugaredLogger("server")
@@ -90,7 +91,7 @@ func main() {
 
 	db, _ := repository.NewBunDB(ctx, dbConfig.PrimaryConnectionString())
 
-	routers, err := route.Routers(ctx, runtimeConfig, db)
+	routers, err := route.Routers(ctx, runtimeConfig, db, jwtConfig)
 	if err != nil {
 		logger.Errorw("Failed to get routers", "error", err)
 	}

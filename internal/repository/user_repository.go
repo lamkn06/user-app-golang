@@ -14,6 +14,7 @@ type UserEntity struct {
 	Id        uuid.UUID `bun:"id,pk,type:uuid"`
 	Name      string    `bun:"name,notnull"`
 	Email     string    `bun:"email,notnull"`
+	Password  string    `bun:"password,notnull"`
 	CreatedAt time.Time `bun:"created_at"`
 	UpdatedAt time.Time `bun:"updated_at"`
 }
@@ -22,6 +23,7 @@ type UserRepository interface {
 	GetUsers() ([]UserEntity, error)
 	InsertUser(user UserEntity) (out UserEntity, err error)
 	GetUserById(id uuid.UUID) (out UserEntity, err error)
+	GetUserByEmail(email string) (out UserEntity, err error)
 }
 
 type DefaultUserRepository struct {
@@ -52,6 +54,14 @@ func (r *DefaultUserRepository) InsertUser(user UserEntity) (out UserEntity, err
 
 func (r *DefaultUserRepository) GetUserById(id uuid.UUID) (out UserEntity, err error) {
 	err = r.db.NewSelect().Model(&out).Where("id = ?", id).Scan(r.ctx)
+	if err != nil {
+		return out, err
+	}
+	return out, nil
+}
+
+func (r *DefaultUserRepository) GetUserByEmail(email string) (out UserEntity, err error) {
+	err = r.db.NewSelect().Model(&out).Where("email = ?", email).Scan(r.ctx)
 	if err != nil {
 		return out, err
 	}

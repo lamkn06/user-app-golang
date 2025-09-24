@@ -14,12 +14,16 @@ type Router interface {
 	Configure(e *echo.Echo)
 }
 
-func Routers(ctx context.Context, config runtime.ServerConfig, db *bun.DB) (routers []Router, err error) {
+func Routers(ctx context.Context, config runtime.ServerConfig, db *bun.DB, jwtConfig runtime.JWTConfig) (routers []Router, err error) {
 	userRepository := repository.NewUserRepository(db, ctx)
 	userService := service.NewUserService(userRepository)
+
+	jwtService := service.NewJWTService(jwtConfig)
+	authService := service.NewAuthService(userRepository, jwtService)
 
 	return []Router{
 		NewHealthRouter(config),
 		NewUserRouter(config, userService),
+		NewAuthRouter(config, authService),
 	}, err
 }
