@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/lamkn06/user-app-golang.git/internal/middleware"
 	"github.com/lamkn06/user-app-golang.git/internal/runtime"
 	"github.com/lamkn06/user-app-golang.git/internal/service"
 	"github.com/lamkn06/user-app-golang.git/pkg/api/request"
@@ -45,13 +46,13 @@ func (r *UserRouter) CreateUser(c echo.Context) error {
 	if err := c.Bind(&user); err != nil {
 		appErr := exception.ToApplicationError(err, exception.ErrorCodeBadRequest)
 		logger.Errorw("Failed to bind user", "error", err)
-		return c.JSON(http.StatusBadRequest, appErr)
+		return c.JSON(appErr.HTTPStatus(), appErr)
 	}
 
 	if err := r.validator.Struct(user); err != nil {
-		appErr := exception.ToApplicationError(err, exception.ErrorCodeBadRequest)
+		appErr := middleware.ParseValidationError(err)
 		logger.Errorw("Failed to validate user", "error", err)
-		return c.JSON(http.StatusBadRequest, appErr)
+		return c.JSON(appErr.HTTPStatus(), appErr)
 	}
 
 	newUser, err := r.userService.NewUser(user)
