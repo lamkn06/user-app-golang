@@ -15,8 +15,8 @@ type UserEntity struct {
 	Name      string    `bun:"name,notnull"`
 	Email     string    `bun:"email,notnull"`
 	Password  string    `bun:"password,notnull"`
-	CreatedAt time.Time `bun:"created_at"`
-	UpdatedAt time.Time `bun:"updated_at"`
+	CreatedAt time.Time `bun:"created_at,notnull,default:current_timestamp"`
+	UpdatedAt time.Time `bun:"updated_at,notnull,default:current_timestamp"`
 }
 
 type UserRepository interface {
