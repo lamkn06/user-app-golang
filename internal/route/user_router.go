@@ -54,14 +54,6 @@ func (r *UserRouter) GetUsers(c echo.Context) error {
 		return c.JSON(appErr.HTTPStatus(), appErr)
 	}
 
-	// Apply defaults if not provided
-	if listReq.Page <= 0 {
-		listReq.Page = 1
-	}
-	if listReq.Limit <= 0 {
-		listReq.Limit = 10
-	}
-
 	// Validate pagination parameters
 	if err := r.validator.Struct(listReq); err != nil {
 		appErr := middleware.ParseValidationError(err)
