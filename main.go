@@ -93,7 +93,9 @@ func main() {
 	// Create startup context
 	ctx := logging.AddLoggerToContext(context.Background(), logger)
 
-	db, _ := repository.NewBunDB(ctx, dbConfig.PrimaryConnectionString())
+	connectionString := dbConfig.PrimaryConnectionString()
+	logger.Infow("Database connection string", "connection", connectionString)
+	db, _ := repository.NewBunDB(ctx, connectionString)
 
 	routers, err := route.Routers(ctx, runtimeConfig, db, jwtConfig)
 	if err != nil {

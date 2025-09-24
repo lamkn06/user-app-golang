@@ -1,0 +1,61 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migration
+  namespace: user-app
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: migration
+        image: postgres:16-alpine
+        env:
+        - name: DB_HOST
+          value: "postgres-service"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: "user_app_db"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: user-app-secrets
+              key: POSTGRES_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: user-app-secrets
+              key: POSTGRES_PASSWORD
+        volumeMounts:
+        - name: migration-files
+          mountPath: /migrations
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          # Wait for database
+          until pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME; do
+            echo "Waiting for database..."
+            sleep 2
+          done
+          
+          # Set password
+          export PGPASSWORD="$DB_PASSWORD"
+          
+          # Run migration files in order
+          echo "Running migration: 000000_enable_postgis.up.sql"
+          psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -f /migrations/000000_enable_postgis.up.sql
+          
+          echo "Running migration: 000001_create_users_table.up.sql"
+          psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -f /migrations/000001_create_users_table.up.sql
+          
+          echo "Running migration: 000002_add_password_to_users.up.sql"
+          psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -f /migrations/000002_add_password_to_users.up.sql
+          
+          echo "Migration completed!"
+      volumes:
+      - name: migration-files
+        configMap:
+          name: migration-files
+  backoffLimit: 3
