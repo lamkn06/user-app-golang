@@ -15,11 +15,16 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiProperty,
+  ApiBody,
 } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CreateUserSchema } from '../schemas';
 import type { CreateUserDto, ListRequestDto } from '../schemas';
-import { UserResponseDto, UserListResponseDto } from '../dto';
+import {
+  UserResponseDto,
+  UserListResponseDto,
+  CreateUserRequestDto,
+} from './dto';
 
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -45,6 +50,7 @@ export class UserController {
   @Post()
   @UsePipes(new ZodValidationPipe(CreateUserSchema))
   @ApiOperation({ summary: 'Create a new user' })
+  @ApiBody({ type: CreateUserRequestDto })
   @ApiResponse({
     status: 201,
     description: 'User created successfully',

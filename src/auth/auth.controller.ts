@@ -12,15 +12,18 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiProperty,
+  ApiBody,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { SignUpSchema, SignInSchema } from '../schemas';
 import type { SignUpDto, SignInDto } from '../schemas';
 import {
+  SignUpRequestDto,
+  SignInRequestDto,
   SignUpResponseDto,
   SignInResponseDto,
   SignOutResponseDto,
-} from '../dto';
+} from './dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 
@@ -32,6 +35,7 @@ export class AuthController {
   @Post('signup')
   @UsePipes(new ZodValidationPipe(SignUpSchema))
   @ApiOperation({ summary: 'Sign up a new user' })
+  @ApiBody({ type: SignUpRequestDto })
   @ApiResponse({
     status: 201,
     description: 'User created successfully',
@@ -45,6 +49,7 @@ export class AuthController {
   @Post('signin')
   @UsePipes(new ZodValidationPipe(SignInSchema))
   @ApiOperation({ summary: 'Sign in a user' })
+  @ApiBody({ type: SignInRequestDto })
   @ApiResponse({
     status: 200,
     description: 'User signed in successfully',
