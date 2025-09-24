@@ -1,3 +1,18 @@
+// @title User API
+// @version 1.0
+// @description This is a user management API
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /api/v1
+
 package main
 
 import (
@@ -14,6 +29,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/labstack/echo/v4"
+	_ "github.com/lamkn06/user-app-golang.git/docs" // This is required for swagger
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 var (
@@ -31,6 +48,9 @@ func (s *Server) start() {
 	server := echo.New()
 
 	server.HTTPErrorHandler = middleware.ErrorHandler
+
+	// Add Swagger route
+	server.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	for _, r := range s.routers {
 		r.Configure(server)

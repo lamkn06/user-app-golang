@@ -1,0 +1,167 @@
+basePath: /api/v1
+definitions:
+  exception.ApplicationError:
+    properties:
+      code:
+        type: string
+      details:
+        items:
+          $ref: '#/definitions/exception.ErrorDetail'
+        type: array
+      message:
+        type: string
+    type: object
+  exception.ErrorDetail:
+    properties:
+      field:
+        type: string
+      key:
+        type: string
+      message:
+        type: string
+    type: object
+  request.NewUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+    required:
+    - email
+    - name
+    type: object
+  response.ErrorResponse:
+    properties:
+      code:
+        type: string
+      details: {}
+      message:
+        type: string
+    type: object
+  response.HealthResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+      version:
+        type: string
+    type: object
+  response.NewUserResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a user management API
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: User API
+  version: "1.0"
+paths:
+  /api/v1/health:
+    get:
+      description: Check if API status is ok
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HealthResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Return API health status
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get all users from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.NewUserResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/exception.ApplicationError'
+      summary: Get all users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with name and email
+      parameters:
+      - description: User information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/request.NewUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.NewUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/exception.ApplicationError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/exception.ApplicationError'
+      summary: Create a new user
+      tags:
+      - users
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.NewUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/exception.ApplicationError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/exception.ApplicationError'
+      summary: Get user by ID
+      tags:
+      - users
+swagger: "2.0"

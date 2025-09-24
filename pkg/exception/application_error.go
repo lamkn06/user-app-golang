@@ -41,6 +41,12 @@ func ToApplicationError(err error, code string) *ApplicationError {
 		return appErr
 	}
 
+	if code == ErrorCodeInternalServerError {
+		return &ApplicationError{
+			Code: code,
+		}
+	}
+
 	return &ApplicationError{
 		Code:    code,
 		Message: err.Error(),

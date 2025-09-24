@@ -30,6 +30,15 @@ func (r *UserRouter) Configure(e *echo.Echo) {
 	e.GET("/api/"+r.config.APIVersion+"/users/:id", r.GetUserById)
 }
 
+// GetUsers godoc
+// @Summary Get all users
+// @Description Get all users from the database
+// @Tags users
+// @Accept json
+// @Produce json
+// @Success 200 {array} response.NewUserResponse
+// @Failure 500 {object} exception.ApplicationError
+// @Router /users [get]
 func (r *UserRouter) GetUsers(c echo.Context) error {
 	users, err := r.userService.GetUsers()
 	if err != nil {
@@ -39,6 +48,17 @@ func (r *UserRouter) GetUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
+// CreateUser godoc
+// @Summary Create a new user
+// @Description Create a new user with name and email
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user body request.NewUserRequest true "User information"
+// @Success 200 {object} response.NewUserResponse
+// @Failure 400 {object} exception.ApplicationError
+// @Failure 500 {object} exception.ApplicationError
+// @Router /users [post]
 func (r *UserRouter) CreateUser(c echo.Context) error {
 	logger := logging.LoggerFromContext(c.Request().Context())
 	user := request.NewUserRequest{}
@@ -58,13 +78,23 @@ func (r *UserRouter) CreateUser(c echo.Context) error {
 	newUser, err := r.userService.NewUser(user)
 	if err != nil {
 		logger.Errorw("Failed to create user", "error", err)
-		appErr := exception.ToApplicationError(err, exception.ErrorCodeInternalServerError)
-		return c.JSON(appErr.HTTPStatus(), appErr)
+		return exception.ToApplicationError(err, exception.ErrorCodeInternalServerError)
 	}
 
 	return c.JSON(http.StatusOK, newUser)
 }
 
+// GetUserById godoc
+// @Summary Get user by ID
+// @Description Get a specific user by their ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Success 200 {object} response.NewUserResponse
+// @Failure 400 {object} exception.ApplicationError
+// @Failure 500 {object} exception.ApplicationError
+// @Router /users/{id} [get]
 func (r *UserRouter) GetUserById(c echo.Context) error {
 	id := c.Param("id")
 	idUUID, err := uuid.Parse(id)
