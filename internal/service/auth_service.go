@@ -54,11 +54,8 @@ func (s *DefaultAuthService) SignUp(req request.SignUpRequest) (response.SignUpR
 	}
 
 	return response.SignUpResponse{
-		User: response.NewUserResponse{
-			ID:    createdUser.Id.String(),
-			Name:  createdUser.Name,
-			Email: createdUser.Email,
-		},
+		ID:    createdUser.Id.String(),
+		Email: createdUser.Email,
 	}, nil
 }
 
@@ -91,7 +88,6 @@ func (s *DefaultAuthService) SignIn(req request.SignInRequest) (response.SignInR
 		RefreshToken: refreshToken,
 		User: response.NewUserResponse{
 			ID:    user.Id.String(),
-			Name:  user.Name,
 			Email: user.Email,
 		},
 	}, nil
