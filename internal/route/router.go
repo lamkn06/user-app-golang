@@ -21,9 +21,13 @@ func Routers(ctx context.Context, config runtime.ServerConfig, db *bun.DB, jwtCo
 	jwtService := service.NewJWTService(jwtConfig)
 	authService := service.NewAuthService(userRepository, jwtService)
 
+	// Create WebSocket service
+	wsService := service.NewWebSocketService()
+
 	return []Router{
 		NewHealthRouter(config),
 		NewUserRouter(config, userService, jwtService),
 		NewAuthRouter(config, authService),
+		NewWebSocketRouter(config, wsService),
 	}, err
 }

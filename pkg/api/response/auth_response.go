@@ -1,7 +1,8 @@
 package response
 
 type SignUpResponse struct {
-	User NewUserResponse `json:"user"`
+	ID    string `json:"id"`
+	Email string `json:"email"`
 }
 
 type SignInResponse struct {

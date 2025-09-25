@@ -29,6 +29,7 @@ import (
 	"github.com/lamkn06/user-app-golang.git/internal/repository"
 	"github.com/lamkn06/user-app-golang.git/internal/route"
 	"github.com/lamkn06/user-app-golang.git/internal/runtime"
+	"github.com/lamkn06/user-app-golang.git/internal/service"
 	"github.com/lamkn06/user-app-golang.git/pkg/logging"
 	"go.uber.org/zap"
 
@@ -101,6 +102,10 @@ func main() {
 	if err != nil {
 		logger.Errorw("Failed to get routers", "error", err)
 	}
+
+	// Start WebSocket Hub in background
+	wsService := service.NewWebSocketService()
+	go wsService.Run(ctx)
 
 	s := Server{routers: routers, config: runtimeConfig, logger: logger}
 	s.start()
